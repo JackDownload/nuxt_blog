@@ -1,4 +1,13 @@
+import 'dotenv/config'
 import colors from 'vuetify/es5/util/colors'
+import createClient from './src/plugins/contentful'
+
+const ctfConfig = {
+  CTF_BLOG_POST_TYPE_ID: process.env.CTF_BLOG_POST_TYPE_ID,
+  CTF_SPACE_ID: process.env.CTF_SPACE_ID,
+  CTF_CDA_ACCESS_TOKEN: process.env.CTF_CDA_ACCESS_TOKEN,
+}
+const cdaClient = createClient(ctfConfig)
 
 export default {
   mode: 'universal',
@@ -30,7 +39,7 @@ export default {
   /*
    ** Customize the progress-bar color
    */
-  loading: { color: '#fff' },
+  loading: { color: '#3b6a70' },
   /*
    ** Global CSS
    */
@@ -42,11 +51,7 @@ export default {
   /*
    ** Nuxt.js modules
    */
-  modules: ['@nuxtjs/vuetify', '@nuxtjs/eslint-module'],
-  /*
-   ** vuetify module configuration
-   ** https://github.com/nuxt-community/vuetify-module
-   */
+  modules: ['@nuxtjs/eslint-module', '@nuxtjs/markdownit', '@nuxtjs/vuetify'],
   vuetify: {
     theme: {
       primary: colors.blue.darken2,
@@ -58,13 +63,18 @@ export default {
       success: colors.green.accent3,
     },
   },
+  markdownit: {
+    injected: true,
+    breaks: true,
+    html: true,
+    linkify: true,
+    typography: true,
+    xhtmlOut: true,
+  },
   /*
    ** Build configuration
    */
   build: {
-    /*
-     ** You can extend webpack config here
-     */
     extend(config, ctx) {
       // Run ESLint on save
       if (ctx.isDev && ctx.isClient) {
@@ -76,5 +86,21 @@ export default {
         })
       }
     },
+  },
+  generate: {
+    routes() {
+      return cdaClient
+        .getEntries({
+          content_type: ctfConfig.CTF_BLOG_POST_TYPE_ID,
+        })
+        .then(entries => {
+          return [...entries.items.map(entry => `/blog/${entry.fields.slug}`)]
+        })
+    },
+  },
+  env: {
+    CTF_SPACE_ID: ctfConfig.CTF_SPACE_ID,
+    CTF_CDA_ACCESS_TOKEN: ctfConfig.CTF_CDA_ACCESS_TOKEN,
+    CTF_BLOG_POST_TYPE_ID: ctfConfig.CTF_BLOG_POST_TYPE_ID,
   },
 }

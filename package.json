@@ -14,7 +14,10 @@
     "generate": "nuxt generate"
   },
   "dependencies": {
+    "@nuxtjs/markdownit": "^1.2.5",
     "@nuxtjs/vuetify": "0.5.5",
+    "contentful": "^7.7.0",
+    "dotenv": "^8.0.0",
     "nuxt": "^2.0.0"
   },
   "devDependencies": {
